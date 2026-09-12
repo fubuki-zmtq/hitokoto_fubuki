@@ -875,11 +875,16 @@ midnight: [
 const eventLines = {
 "1-1": ["あけましておめでとう。今年も良い一年にしましょうね"],
 "1-12": ["今日は…あの人の誕生日ね。 …お団子食べたくなってきた"],
+"2-14": ["バレンタインデーね。 …今年も今日まで忘れていたわ"],
+"3-14": ["今日はホワイトデーね、街で甘味でも買ってこようかしら。自分用に"],
+"3-15~3-31": ["少し暖かくなってきたわね… そろそろそっちでは桜が咲くかしら"],
 "4-1": ["今日から私、ニライカナイに引っ越すことにしたの。 …当然嘘よ"],
 "5-17": ["今日は誕生日ね、ケーキでも食べようかしら。 …いや、この世界での誕生日は知らないけど…"],
 "8-5": ["…今日はあの場所の……何周年なんだ…？"],
+"9-15~9-21": ["シルバーウィーク…いいなぁ…"],
 "10-31": ["トリックオアトリート！ 冗談よ、お菓子いる？"],
-"12-25": ["今日はクリスマス、プレゼントには時間がほしいわ。 …前の人生でもそんなこと言ってたような…"],
+"11-1~11-20": ["そろそろ寒くなってきた？ こっちはずっと寒いわよ"],
+"12-25": ["今日はクリスマス、プレゼントには時間がほしいわ。 …ずっと前もそんなこと言ってたような…"],
 "12-31": ["今日は大晦日ね、充実した一年だった？ 来年もよろしくね"]
 };
 
@@ -1175,9 +1180,10 @@ function getFaceImage(text) {
     "カップラーメン食べたいなぁ",
     "護王様ってあの身体でどうやって仕事してるんだろ",
     "今日は…あの人の誕生日ね。 …お団子食べたくなってきた",
+    "少し暖かくなってきたわね… そろそろそっちでは桜が咲くかしら",
     "今日は誕生日ね、ケーキでも食べようかしら。 …いや、この世界での誕生日は知らないけど…",
     "…今日はあの場所の……何周年なんだ…？",
-    "今日はクリスマス、プレゼントには時間がほしいわ。 …前の人生でもそんなこと言ってたような…",
+    "今日はクリスマス、プレゼントには時間がほしいわ。 …ずっと前もそんなこと言ってたような…",
     "いい匂い… これはカンボジアブロッコリー…？",
     "そういえば、あなたの誕生日っていつなの？",
     "なんだか最近よく顔を見ている気がするわね",
@@ -2514,10 +2520,29 @@ function speak(){
   }
 
   const zone = getZone(currentHour);
-  const key = (now.getMonth()+1)+"-"+now.getDate();
+  const todayM = now.getMonth() + 1;
+  const todayD = now.getDate();
+  const todayNum = todayM * 100 + todayD; 
 
-  if(eventLines[key] && Math.random()<0.3){
-    showLine(pick(eventLines[key]), false);
+  let availableEventLines = [];
+  for (let key in eventLines) {
+    if (key.includes("~")) {
+      const [start, end] = key.split("~");
+      const [sM, sD] = start.split("-").map(Number);
+      const [eM, eD] = end.split("-").map(Number);
+      const startNum = sM * 100 + sD;
+      const endNum = eM * 100 + eD;
+      
+      if (todayNum >= startNum && todayNum <= endNum) {
+        availableEventLines.push(...eventLines[key]);
+      }
+    } else if (key === `${todayM}-${todayD}`) {
+      availableEventLines.push(...eventLines[key]);
+    }
+  }
+
+  if (availableEventLines.length > 0 && Math.random() < 0.3) {
+    showLine(pick(availableEventLines), false);
     return;
   }
 
